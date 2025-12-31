@@ -1,0 +1,32 @@
+# System
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Node.js
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Android
+.gradle/
+local.properties
+.idea/
+*.iml
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.vscode/
+.idea/
+*.swp

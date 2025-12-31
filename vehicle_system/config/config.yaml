@@ -1,0 +1,169 @@
+# RK3568 Remote Rover System Configuration
+
+# System Configuration
+system:
+  device_name: "RK3568-Rover-01"
+  platform: "rk3568"
+  debug_mode: true
+  log_level: "INFO"
+  log_file: "/var/log/rk3568_rover.log"
+
+# Camera Configuration
+camera:
+  # Front Camera (USB)
+  front:
+    device_id: 0
+    resolution: [1280, 720]
+    fps: 30
+    format: "MJPEG"
+    enabled: true
+  
+  # Rear Camera (USB)
+  rear:
+    device_id: 1
+    resolution: [1280, 720]
+    fps: 30
+    format: "MJPEG"
+    enabled: true
+  
+  # Camera buffer settings
+  buffer_size: 3
+  frame_timeout: 5000  # ms
+
+# Video Encoding Configuration
+video_encoding:
+  codec: "h264"
+  profile: "baseline"
+  level: "3.1"
+  bitrate: 1024  # kbps
+  gop: 60
+  hardware_acceleration: true
+  rkmpp_enabled: true
+  preset: "medium"  # ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+
+# Audio Configuration
+audio:
+  # Microphone input
+  microphone:
+    device_index: 0
+    sample_rate: 16000
+    channels: 1
+    chunk_size: 1024
+    enabled: true
+  
+  # Speaker output
+  speaker:
+    device_index: 0
+    sample_rate: 16000
+    channels: 1
+    enabled: true
+  
+  # Audio encoding
+  encoding:
+    codec: "opus"
+    bitrate: 24  # kbps
+    frame_duration: 20  # ms
+    sample_rate: 16000
+
+# WebRTC Configuration
+webrtc:
+  # STUN/TURN servers for NAT traversal
+  ice_servers:
+    - urls: ["stun:stun.l.google.com:19302"]
+    - urls: ["stun:stun1.l.google.com:19302"]
+    # Add TURN servers if needed for restrictive networks
+    # - urls: ["turn:your-turn-server.com"]
+    #   username: "username"
+    #   credential: "password"
+  
+  # Media constraints
+  media:
+    video:
+      enabled: true
+      width: 1280
+      height: 720
+      frameRate: 30
+    audio:
+      enabled: true
+      sampleRate: 16000
+      channels: 1
+  
+  # Signaling configuration
+  signaling:
+    protocol: "websocket"
+    server_url: "ws://localhost:8765"
+    reconnect_interval: 5  # seconds
+    max_reconnect_attempts: 10
+
+# Motor Control Configuration
+motor_control:
+  # Motor driver interface
+  driver_type: "balance_car"  # balance_car, pwm, serial
+  
+  # Serial communication (if using serial interface)
+  serial:
+    port: "/dev/ttyUSB0"
+    baudrate: 115200
+    timeout: 1.0
+  
+  # GPIO pins (if using GPIO control)
+  gpio:
+    left_motor_pin: 17
+    right_motor_pin: 27
+    enable_pin: 22
+  
+  # Motor parameters
+  motor:
+    max_speed: 255
+    min_speed: 0
+    acceleration: 10
+    deceleration: 10
+    timeout: 5000  # ms - auto stop if no command received
+
+# Network Configuration
+network:
+  # Interface for WebRTC
+  interface: "eth0"  # or "wlan0" for WiFi
+  
+  # Bandwidth management
+  bandwidth:
+    max_bitrate: 2048  # kbps
+    min_bitrate: 512   # kbps
+    target_bitrate: 1024  # kbps
+
+# Performance Tuning
+performance:
+  # Threading
+  video_threads: 2
+  audio_threads: 1
+  
+  # Buffer sizes
+  video_buffer_size: 10
+  audio_buffer_size: 5
+  
+  # CPU affinity (optional)
+  cpu_affinity: [0, 1, 2, 3]
+
+# Monitoring and Health Check
+monitoring:
+  enabled: true
+  health_check_interval: 10  # seconds
+  metrics_enabled: true
+  metrics_port: 9090
+
+# Security Configuration
+security:
+  # Authentication token (should be loaded from environment)
+  auth_token: "${AUTH_TOKEN}"
+  
+  # SSL/TLS for signaling
+  use_ssl: false
+  cert_file: "/etc/ssl/certs/rover.crt"
+  key_file: "/etc/ssl/private/rover.key"
+
+# Emergency and Safety
+safety:
+  emergency_stop_enabled: true
+  auto_stop_on_disconnect: true
+  max_operation_time: 3600  # seconds (1 hour)
+  temperature_limit: 80  # Celsius
