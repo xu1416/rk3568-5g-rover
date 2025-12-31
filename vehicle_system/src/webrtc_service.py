@@ -81,6 +81,22 @@ class WebRTCSignalingServer:
             self.peers[peer_id] = pc
             
             logger.info(f"Peer connection created for {peer_id}")
+
+            # OPTIMIZATION: Configure DataChannel for low latency (UDP-like)
+            # ordered=False: Don't wait for missing packets
+            # maxRetransmits=0: Don't retransmit lost packets
+            @pc.on("datachannel")
+            def on_datachannel(channel):
+                logger.info(f"Received data channel: {channel.label}")
+                if channel.label == "control":
+                    channel.ordered = False
+                    channel.maxRetransmits = 0
+                    logger.info("Configured control channel for low latency (ordered=False, maxRetransmits=0)")
+                    
+                    @channel.on("message")
+                    def on_message(message):
+                        if self.on_control_command:
+                            asyncio.create_task(self.on_control_command(peer_id, message))
             
             # Set up event handlers
             @pc.on("connectionstatechange")
@@ -157,11 +173,14 @@ class WebRTCSignalingServer:
                 return None
             
             pc = self.peers[peer_id]
-            dc = pc.createDataChannel(label)
+            # OPTIMIZATION: Create DataChannel with low latency configuration
+            # ordered=False: Don't wait for missing packets
+            # maxRetransmits=0: Don't retransmit lost packets
+            dc = pc.createDataChannel(label, ordered=False, maxRetransmits=0)
             
             @dc.on("message")
             def on_message(message):
-                logger.debug(f"Data channel message from {peer_id}: {message}")
+                # logger.debug(f"Data channel message from {peer_id}: {message}") # Reduce logging for high freq
                 if self.on_control_command:
                     asyncio.create_task(self.on_control_command(peer_id, message))
             

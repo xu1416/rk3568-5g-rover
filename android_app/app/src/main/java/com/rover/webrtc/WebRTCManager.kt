@@ -98,7 +98,9 @@ class WebRTCManager(
             
             // Create data channel for control commands
             val dataChannelInit = DataChannel.Init()
-            dataChannelInit.ordered = true
+            // OPTIMIZATION: Low latency configuration
+            dataChannelInit.ordered = false // Don't wait for missing packets
+            dataChannelInit.maxRetransmits = 0 // Don't retransmit lost packets
             dataChannelInit.negotiated = false
             
             dataChannel = peerConnection?.createDataChannel("control", dataChannelInit)
